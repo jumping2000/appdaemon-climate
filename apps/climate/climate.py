@@ -7,7 +7,7 @@ import appdaemon.plugins.hass.hassapi as hass
 
 @dataclass
 class Preferences:
-    """ Preferenze """
+    """Preferenze"""
     input_time: str
     input_temperature: str
     target_area: str
@@ -24,22 +24,19 @@ class Climate(hass.Hass):
     """Hacs class."""
 
     def initialize(self):
-        """ Inizializza """
+        """Inizializza"""
         try:
             self.thermostat = self.args["thermostat"]
         except KeyError:
             self.log("missing required argument: thermostat")
             raise
-
         try:
             self.prefs = Preferences.from_args(self.args["preferences"])
         except KeyError:
             self.log("missing required argument: preferences")
             raise
-
         self.log(f"preferences: {self.prefs}")
         self.time_pref = self.create_pref_time_dict()
-
         try:
             self._outside_temperature_sensor = self.args["weather_sensor"]
         except KeyError:
@@ -55,12 +52,12 @@ class Climate(hass.Hass):
 
     @property
     def outside_temperature(self) -> float:
-        """ Temperatura Esterna """
+        """Temperatura Esterna"""
         return float(self.get_state(self._outside_temperature_sensor))
 
     @property
     def max_temperature(self) -> int:
-        """ Temperatura Esterna massima """
+        """Temperatura Esterna massima"""
         try:
             return int(float(self.get_state(self.args.get("max_temperature"))))
         except Exception as e:
@@ -69,7 +66,7 @@ class Climate(hass.Hass):
 
     @property
     def min_temperature(self) -> int:
-        """ Temperatura Esterna minima """
+        """Temperatura Esterna minima"""
         try:
             return int(float(self.get_state(self.args.get("min_temperature"))))
         except Exception:
@@ -78,14 +75,14 @@ class Climate(hass.Hass):
 
     @property
     def thermostat_temperature(self) -> int:
-        """ Temperatura target """
+        """Temperatura target"""
         return int(self.get_state(
             self.thermostat, attribute="current_temperature"
         ))
 
     @property
     def mode_switching_enabled(self) -> bool:
-        """ Mode switching """
+        """Mode switching"""
         try:
             return bool(self.get_state(self.args.get("mode_switching_enabled")))
         except Exception as e:
@@ -94,7 +91,7 @@ class Climate(hass.Hass):
 
     @property
     def climate_temperature_difference(self) -> int:
-        """ Temperature difference """
+        """Temperature difference"""
         try:
             return int(float(self.get_state(self.args.get("input_number.climate_temperature_difference", 0))))
         except Exception:
@@ -103,17 +100,17 @@ class Climate(hass.Hass):
 
     @property
     def inside_temperature_sensors(self) -> Dict[str, Dict[str, List[str]]]:
-        """ Temperature difference """
+        """Temperature difference"""
         return self.args.get("inside_temperature_sensors", {})
 
     def get_temperature_sensors(self) -> Iterable[str]:
-        """ Temperature difference """
+        """Temperature difference"""
         for d in self.inside_temperature_sensors.values():
             for sensor in d.values():
                 yield from sensor
 
     def open_close_callback(self, entity, attribute, old, new, kwargs):
-        """ Temperature difference """
+        """Temperature difference"""
         self.log(f"Running open_close_callback, new: {new}, old: {old}, entity: {entity}")
         if old == new:
             return
@@ -125,18 +122,18 @@ class Climate(hass.Hass):
             self.log(f"Unknown state: {new}")
 
     def turn_off_climate(self, kwargs=None):
-        """  Temperature difference """
+        """Temperature difference"""
         self.log("Turning climate off")
         self.call_service("climate/turn_off", entity_id=self.thermostat)
         self.run_in(self.turn_on_climate, self.open_close_callback)
 
     def turn_on_climate(self, kwargs=None):
-        """  Temperature difference """
+        """Temperature difference"""
         self.log("Turning climate on")
         self.call_service("climate/turn_on", entity_id=self.thermostat)
 
     def temperature_check(self, kwargs):
-        """  Temperature difference """
+        """Temperature difference"""
         self.log("Checking temperature")
         pref = self.nearest(self.time_pref.keys(), self.get_now())
         preference = self.time_pref.get(pref)
@@ -144,7 +141,7 @@ class Climate(hass.Hass):
         self._set_temp(preference)
 
     def _set_temp(self, preference: Preferences):
-        """  Temperature difference """
+        """Temperature difference"""
         temp_to_set = float(self.get_state(preference.input_temperature))
         current_outside_temp = self.outside_temperature
         current_state = self.get_state(self.thermostat)
@@ -177,7 +174,6 @@ class Climate(hass.Hass):
         else:
             mode = "cool"
         self.log(f"Current mode: {current_state}, desired mode: {mode}")
-
         if mode == "cool" and self.min_temperature == temp_to_set and self.mode_switching_enabled and current_state == "heat":
             self.log(f"Changing climate mode from {current_state} to {mode}")
             self.call_service(
@@ -196,7 +192,7 @@ class Climate(hass.Hass):
         )
 
     def get_adjusted_temp(self, temp_to_set, thermostat_temp, current_temps, target_area):
-        """  Temperature difference """
+        """Temperature difference"""
         try:
             adjustment = thermostat_temp - current_temps[target_area]
         except KeyError:
@@ -204,12 +200,11 @@ class Climate(hass.Hass):
                 f"Could not find target area: {target_area} in current temperatures"
             )
             adjustment = 0
-
         temp_to_set += adjustment
         return temp_to_set
 
     def get_current_temperatures(self, sensors):
-        """  Temperature difference """
+        """Temperature difference"""
         current_temps = {}
         for k, v in sensors.items():
             temps = []
@@ -222,14 +217,13 @@ class Climate(hass.Hass):
                     temps.append(float(inside_temp))
                 except (ValueError, TypeError):
                     self.log(f"could not parse {inside_temp}")
-
             if temps:
                 current_temps[k] = sum(temps) / len(temps)
                 self.log(f"Current temperature: {k} {current_temps[k]}")
         return current_temps
 
     def nearest(self, items, pivot):
-        """  Temperature difference """
+        """Temperature difference"""
         date_items = [
             datetime.datetime.combine(datetime.date.today(), x, tzinfo=pivot.tzinfo)
             for x in items
@@ -240,7 +234,7 @@ class Climate(hass.Hass):
         return min(date_items, key=lambda x: abs(x - pivot)).time()
 
     def create_pref_time_dict(self) -> Dict[datetime.time, Preferences]:
-        """  Temperature difference """
+        """Temperature difference"""
         ret = {}
         for val in self.prefs.values():
             state = self.get_state(val.input_time)

@@ -186,7 +186,8 @@ class Climate(hass.Hass):
                 "climate/set_hvac_mode", hvac_mode=mode, entity_id=self.thermostat
             )
         self.log(
-            f"Current Temp Outside: {current_outside_temp}, current indoor temp: {target_area_temp} setting indoor temp to: {temp_to_set}, using mode: {mode}"
+            f"Current Temp Outside: {current_outside_temp}, current indoor temp: {target_area_temp} \
+                setting indoor temp to: {temp_to_set}, using mode: {mode}"
         )
         self.call_service(
             "climate/set_temperature", entity_id=self.thermostat, temperature=temp_to_set

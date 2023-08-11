@@ -108,9 +108,9 @@ class Climate(hass.Hass):
         if old == new:
             return
 
-        if new == "open" or new == "on":
+        if new in ("open", "on"):
             self.turn_off_climate()
-        elif new == "closed" or new == "off":
+        elif new in ("closed", "off"):
             self.turn_on_climate()
         else:
             self.log(f"Unknown state: {new}")

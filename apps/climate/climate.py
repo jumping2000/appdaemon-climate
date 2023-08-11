@@ -8,7 +8,7 @@ import appdaemon.plugins.hass.hassapi as hass
 @dataclass
 class Preferences:
     """Preferenze"""
-    
+
     input_time: str
     input_temperature: str
     target_area: str

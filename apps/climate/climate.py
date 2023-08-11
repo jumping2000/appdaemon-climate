@@ -93,7 +93,7 @@ class Climate(hass.Hass):
         except Exception:
             self.log("Unable to parse input_number.climate_temperature_difference", level="WARNING")
             return 0
-   
+
     @property
     def inside_temperature_sensors(self) -> Dict[str, Dict[str, List[str]]]:
         return self.args.get("inside_temperature_sensors", {})

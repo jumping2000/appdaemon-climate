@@ -15,7 +15,7 @@ class Preferences:
 
     @classmethod
     def from_args(cls, prefs: Dict[str, Dict[str, str]]) -> Dict[str, "Preferences"]:
-        """ Argomenti """
+        """Argomenti"""
         ret = {}
         for k, v in prefs.items():
             ret[k] = cls(**v)

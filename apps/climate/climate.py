@@ -170,7 +170,7 @@ class Climate(hass.Hass):
         self.log(
             f"adj_temp: {temp_to_set}, thermostat_temp: {thermostat_temp}, current_outside_temp: {current_outside_temp}"
         )
-        if target_area_temp > current_outside_temp and target_area_temp < temp_to_set:
+        if current_outside_temp < target_area_temp < temp_to_set:
             mode = "heat"
         else:
             mode = "cool"
